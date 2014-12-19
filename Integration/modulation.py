@@ -92,8 +92,6 @@ class Signal:
 			res.append(r)
 			phase.append(p)
 			amp.append(a)
-
-		print this.m.size()
 			
 		return [res, src, amp, phase]
 

@@ -169,7 +169,11 @@ class CS4031_GUI(wx.Frame):
         # take in generated string and noise string
         global seq, seqNoise
         seq = self.seq_length.GetValue()
-        seqNoise = '1001'
+        
+        print ""
+        print "input"
+        print seq
+        print ""
 
         mod = self.mod_type.GetValue()
 
@@ -178,19 +182,16 @@ class CS4031_GUI(wx.Frame):
         speed = self.speed_up.GetValue()
         try:
             int(speed)
-            print speed
         except ValueError:
 	    message = message + 'Invalid input on speed up\r\n'
             print "invalid input on speed_up"
 	    error = True
 
         code = self.coding.GetValue()
-        print noise
 
         res = self.resolution.GetValue()
         try: 
             int(res)
-            print res
         except ValueError:
 	    message = message + 'Invalid input on resolution\r\n'
             print "invalid input on resolution"
@@ -226,11 +227,15 @@ class CS4031_GUI(wx.Frame):
             temp = self.get_max(src)
             maxSource = res[pos]
 
+            print "signal"
+            print temp
+            print ""
+            print "noise signal"
+            print maxSource
+            print ""
+
             amp = amplitude[pos]
             pha = phase[pos]
-
-            print amp
-            print pha
 
             noise_ratio = []
             phase_y = []
@@ -238,8 +243,6 @@ class CS4031_GUI(wx.Frame):
             for x in range(0, 10):
                 noise_ratio.append(temp[x]/maxSource[x])
                 phase_y.append(amp[x]*math.sin((pha[x])*(57.2957795)))
-
-            print noise_ratio
 
             #demodulate
             dem = Demodulator()
@@ -250,7 +253,9 @@ class CS4031_GUI(wx.Frame):
             
             #result
             out = dem.generate(temp)
+            print "output"
             print out
+            print ""
 
             global const_x, const_y
             const_x = np.append(const_x,0.0)
@@ -263,8 +268,6 @@ class CS4031_GUI(wx.Frame):
             for c in range(0,10):
                 ber_y = np.append(ber_y,calculateBER(temp[c], maxSource[c]))
 
-            print type(const_x)
-            print const_x
             global con
             con.drawConsPlot(const_x,const_y)
 
@@ -309,9 +312,6 @@ class CS4031_GUI(wx.Frame):
         self.canvas.draw()
 
     def drawConsPlot(self, t, c):
-
-        print t
-        print c
 
         self.plot_datac = self.axes1.scatter(
             t,c, 
