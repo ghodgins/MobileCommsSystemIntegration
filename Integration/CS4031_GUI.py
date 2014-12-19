@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-
 import wx
 import datetime
 import numpy as np
 from numpy import arange, sin, pi, cos
 import matplotlib
+import math
 
 #modulation stuff
 from modulation import Signal
@@ -31,14 +31,14 @@ global seqNoise
 global pos
 
 global const_x
-const_x = 0.0,0.1,0.5,0.6,0.8,1.0,2.0
+const_x = []
 global const_y
-const_y = 0.3,0.4,0.2,0.6,0.2,1.0,2.0
+const_y = []
 
 global ber_x
-ber_x = 0.0,0.1,0.5,0.6,0.8,1.0,2.0
+ber_x = []
 global ber_y
-ber_y = 0.3,0.4,0.2,0.6,0.2,1.0,2.0
+ber_y = []
 
 global con
 global ber
@@ -155,8 +155,10 @@ class CS4031_GUI(wx.Frame):
             d['ModDate'] = datetime.datetime.today()
 
     def OnConsClear(self, event):
-        self.plot_data.remove()
+        self.plot_datac.remove()
         self.canvas1.draw()
+        self.plot_datab.remove()
+        self.canvas.draw()
 
     def OnRun(self, event):
         print "Running..."
@@ -219,21 +221,23 @@ class CS4031_GUI(wx.Frame):
                 levels = 2
                 sig = Signal(levels)
 
-            res, src = sig.generate(str(seq), True)
+            res, src, amplitude, phase = sig.generate(str(seq), True)
 
             temp = self.get_max(src)
             maxSource = res[pos]
 
-            print "temp"
-            print temp
-            print "maxSource"
-            print maxSource
+            amp = amplitude[pos]
+            pha = phase[pos]
+
+            print amp
+            print pha
+
             noise_ratio = []
+            phase_y = []
 
-            for x in range(0, 15):
-                noise_ratio.append(4)
-
-            print maxSource
+            for x in range(0, 10):
+                noise_ratio.append(temp[x]/maxSource[x])
+                phase_y.append(amp[x]*math.sin((pha[x])*(57.2957795)))
 
             print noise_ratio
 
@@ -242,23 +246,31 @@ class CS4031_GUI(wx.Frame):
             if qam_on is True:
                 dem.build((levels), True)
             else:
-                print "check"
                 dem.build(4, False)
             
             #result
             out = dem.generate(temp)
-
             print out
 
-            #test stuff
             global const_x, const_y
-            const_x = np.append(const_x,3.0)
-            const_y = np.append(const_y,3.0)
+            const_x = np.append(const_x,0.0)
+            const_y = np.append(const_y,0.0)
+            for i in range(0,10):
+                const_x = np.append(const_x,amplitude[pos][i])
+                const_y = np.append(const_y,phase_y[i])
+
+            global ber_x, ber_y
+            for c in range(0,10):
+                ber_y = np.append(ber_y,calculateBER(temp[c], maxSource[c]))
+
+            print type(const_x)
+            print const_x
             global con
             con.drawConsPlot(const_x,const_y)
-            global ber_x, ber_y
-            ber_x = np.append(ber_x,3.0)
-            ber_y = np.append(ber_y,3.0)
+
+            for i in range(0,len(noise_ratio)):
+                ber_x = np.append(ber_x,abs(noise_ratio[i]))
+            
             global ber
             ber.drawBerPlot(ber_x,ber_y)
         
@@ -289,16 +301,19 @@ class CS4031_GUI(wx.Frame):
         return temp
 
     def drawBerPlot(self, t, c):
-        self.plot_data = self.axes.plot(
+        self.plot_datab = self.axes.scatter(
             t,c, 
             linewidth=1,
             color=(1, 0.5, 0),
-            )[0]
+            )
         self.canvas.draw()
 
     def drawConsPlot(self, t, c):
 
-        self.plot_data = self.axes1.scatter(
+        print t
+        print c
+
+        self.plot_datac = self.axes1.scatter(
             t,c, 
             linewidth=1,
             color=(1, 0.5, 0),
@@ -315,11 +330,11 @@ class CS4031_GUI(wx.Frame):
         pylab.setp(self.axes.get_xticklabels(), fontsize=8)
         pylab.setp(self.axes.get_yticklabels(), fontsize=8)
 
-        self.plot_data = self.axes.plot(
+        self.plot_datab = self.axes.scatter(
             t,s, 
             linewidth=1,
             color=(1, 0.5, 0),
-            )[0]
+            )
         return self
 	
     def init_plot_Cons(self, t, s):
@@ -340,23 +355,12 @@ class CS4031_GUI(wx.Frame):
         pylab.setp(self.axes1.get_xticklabels(), fontsize=8)
         pylab.setp(self.axes1.get_yticklabels(), fontsize=8)
 
-        self.plot_data = self.axes1.scatter(
+        self.plot_datac = self.axes1.scatter(
             t,s, 
             linewidth=1,
             color=(1, 0.5, 0),
             )
         return self
-
-def set_ber_y(charOriginal, charNoise):
-    global ber_y
-    global newTransmission
-
-    if newTransmission == True:
-        ber_y.clear()
-        newTransmission = False
-    #TODO: charOriginal, charNoise should preferably be passed in here as bit arrays
-    newValue = calculateBER(charOriginal, charNoise)
-    const_x = np.append(const_x, newValue)
 		  
 def main():
     
