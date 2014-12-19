@@ -57,8 +57,8 @@ class Signal:
 		a = sig_data['amplitude']
 		w = math.radians(sig_data['omega'])
 		p = math.radians(sig_data['theta'])
-		print p
 		step = 0.0
+
 		for t in xrange(0, size):
 			# Signal
 			#print t
@@ -66,8 +66,7 @@ class Signal:
 			s[0][t] = a*math.sin(w*step + p)
 			# With noise
 			s[1][t] = s[0][t] + rand(this.mean, this.std)
-		#print s[0][0]
-		#print val
+
 		return s
 
 	def build(this, input = msg):
@@ -81,9 +80,17 @@ class Signal:
 		for i in xrange(0, this.m.size()):
 			temp = this.l.get( this.m.get(i) )
 			s, r = this.signal(temp)
-			
+			#n = s/r
+
+			#snr.append(n)
 			src.append(s)
 			res.append(r)
+
+		print "src"
+		print src
+		print "end"
+
+		print this.m.size()
 			
 		return [res, src]
 

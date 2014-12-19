@@ -36,15 +36,16 @@ class Demodulator:
 		temp = math.asin(wave)
 
 		result = temp - (this.OMEGA * this.TPSK) # Phase = y - wt
-		print result # radians approx
-		
+		#print result #radians approx
+
 		min = 1000
 		code = 0
-		
+
 		for pair in this.TABLE:
 			if abs(pair[0] - result) < min:
 				min = abs(pair[0] - result)
 				code = pair[1]
+
 		return code
 
 	def demodulateQAM(this, waveT1, waveT2):
@@ -85,7 +86,6 @@ class Demodulator:
 		res = []
 		if qam == False:
 			for i in wave:
-				#print i
 				res.append(this.demodulate(i))
 		else:
 			assert(len(wave) == len(wave2))
@@ -101,9 +101,7 @@ class Demodulator:
 		while i > 2:
 			i = i/2
 			j += 1
-			#print j
 		this.TABLE = psk[j]
-			#print TABLE
 
 	def get_table(this):
 		return this.TABLE
@@ -128,9 +126,6 @@ testSetQAM = [
 				[-0.1411910454, -0.1828012135, 12], [-0.7128699828, -0.776513639, 13], 
 				[0.0444855628, -0.0888491938, 14], [-0.5270829702, -0.6824186779, 15]
 			]
-
-
-    
 test_set = [ testSet2, testSet4, testSet8, testSet16, testSetQAM ]
 
 def check(a, b, output):
@@ -145,7 +140,6 @@ def check_set(d, i):
 	output = [ n[1] for n in test_set[i] ]
 	res = d.generate(input)
 	for j in xrange(0, len(res)):
-		#print res[j]
 		check( res[j], output[j], "Demodulate: " + str(input[j]) + 
 			" Expected: " + str(output[j]) + " Got: " + str(res))
 

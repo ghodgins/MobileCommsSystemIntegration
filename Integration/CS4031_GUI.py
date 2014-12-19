@@ -9,8 +9,8 @@ from numpy import arange, sin, pi, cos
 import matplotlib
 
 #modulation stuff
-#from modulation import Signal
-#from demodulator import Demodulator
+from modulation import Signal
+from demodulator import Demodulator
 
 from BERCalculation import calculateBER
 
@@ -27,6 +27,8 @@ import pylab
 global newTransmission
 global seq
 global seqNoise
+
+global pos
 
 global const_x
 const_x = 0.0,0.1,0.5,0.6,0.8,1.0,2.0
@@ -80,7 +82,7 @@ class CS4031_GUI(wx.Frame):
         self.seq_length = wx.TextCtrl(pnl, value = "1011", pos = (50,100))
         self.seq_length_text = wx.StaticText(pnl, label = "Sequence Length:", pos = (50,80))
 
-        self.mod_type = wx.TextCtrl(pnl, value = "1", pos = (50, 150))
+        self.mod_type = wx.TextCtrl(pnl, value = "0", pos = (50, 150))
         self.mod_type_text = wx.StaticText(pnl, label = "Mod Type:", pos = (50, 130))
 
         self.noise_type = wx.TextCtrl(pnl, value = "Gaussian", pos = (50, 200))
@@ -160,6 +162,7 @@ class CS4031_GUI(wx.Frame):
         print "Running..."
     	error = False #flag for if any invalid input is detected
     	message = "" #holds the error message if any invalid input is detected
+        global pos
 
         # take in generated string and noise string
         global seq, seqNoise
@@ -196,40 +199,55 @@ class CS4031_GUI(wx.Frame):
     	if(error):
     	    wx.MessageBox(message, 'Error in input', wx.OK | wx.ICON_ERROR)
     	else:
-            #if seq is 4:
-             #   levels = 16
-              #  qam_on = True
-               # sig = Signal((levels), True)
-            #if seq is 3:
-             #   levels = 16
-              #  sig = Signal(levels)
-            #if seq is 2:
-             #   levels = 8
-              #  sig = Signal(levels)
-            #if seq is 1:
-             #   levels = 4
-              #  sig = Signal(levels)
-            #else:
-             #   levels = 2
-              #  sig = Signal(levels)
+            if int(mod) is 4:
+                levels = 16
+                qam_on = True
+                sig = Signal((levels), True)
+            if int(mod) is 3:
+                levels = 16
+                sig = Signal(levels)
+            if int(mod) is 2:
+                levels = 8
+                sig = Signal(levels)
+            if int(mod) is 1:
+                levels = 4
+                sig = Signal(levels)
+            if int(mod) is 0:
+                levels = 2
+                sig = Signal(levels)
+            else:
+                levels = 2
+                sig = Signal(levels)
 
-            #res, src = sig.generate(seq, True)
+            res, src = sig.generate(str(seq), True)
 
-            #temp = get_max(src)
+            temp = self.get_max(src)
+            maxSource = res[pos]
 
-            #sourse
-            #for i in temp:
-            #    print i
+            print "temp"
+            print temp
+            print "maxSource"
+            print maxSource
+            noise_ratio = []
+
+            for x in range(0, 15):
+                noise_ratio.append(4)
+                print temp
+
+            print noise_ratio
 
             #demodulate
-            #dem = Demodulator()
-            #if qam_on is True:
-            #    dem.build((levels), True)
-            #else:
-            #    dem.build(levels)
+            dem = Demodulator()
+            if qam_on is True:
+                dem.build((levels), True)
+            else:
+                print "check"
+                dem.build(4, False)
             
             #result
-            #out = dem.generate(temp)
+            out = dem.generate(temp)
+
+            print out
 
             #test stuff
             global const_x, const_y
@@ -242,8 +260,8 @@ class CS4031_GUI(wx.Frame):
             ber_y = np.append(ber_y,3.0)
             global ber
             ber.drawBerPlot(ber_x,ber_y)
-
-        print calculated
+        
+        print "calculated"
 
     def OnConsCalculate(self, event):
 
@@ -257,13 +275,15 @@ class CS4031_GUI(wx.Frame):
 
         print "Hold Pressed"
 
-    def get_max(arr):
-        temp = [0] * len(src)
+    def get_max(self, arr):
+        temp = [0] * len(arr)
+        global pos
         i = 0
-        for r in src:
+        for r in arr:
             for s in r:
                 if abs(s) > temp[i]:
                     temp[i] = s
+                    pos = i
             i += 1
         return temp
 
@@ -276,7 +296,6 @@ class CS4031_GUI(wx.Frame):
         self.canvas.draw()
 
     def drawConsPlot(self, t, c):
-        print "Run working"
 
         self.plot_data = self.axes1.scatter(
             t,c, 
