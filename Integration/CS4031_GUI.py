@@ -232,7 +232,8 @@ class CS4031_GUI(wx.Frame):
 
             for x in range(0, 15):
                 noise_ratio.append(4)
-                print temp
+
+            print maxSource
 
             print noise_ratio
 
