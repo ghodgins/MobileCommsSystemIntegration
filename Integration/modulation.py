@@ -52,7 +52,10 @@ class Signal:
 
 	def signal(this, sig_data): # amplitude, frequency, phase
 		size = int(math.ceil(this.period / this.dt))
-		s = [ [0.0 for x in xrange(0, size)] for x in xrange(0, 2) ] # Blank array
+		s = [ [0.0 for x in xrange(0, size)] for x in xrange(0, 4) ] # Blank array
+
+		global amp
+		global phase
 
 		a = sig_data['amplitude']
 		w = math.radians(sig_data['omega'])
@@ -66,6 +69,8 @@ class Signal:
 			s[0][t] = a*math.sin(w*step + p)
 			# With noise
 			s[1][t] = s[0][t] + rand(this.mean, this.std)
+			s[2][t] = a
+			s[3][t] = p
 
 		return s
 
@@ -77,22 +82,20 @@ class Signal:
 			this.build(input)
 		res = []
 		src = []
+		amp = []
+		phase = []
 		for i in xrange(0, this.m.size()):
 			temp = this.l.get( this.m.get(i) )
-			s, r = this.signal(temp)
-			#n = s/r
+			s, r, a, p = this.signal(temp)
 
-			#snr.append(n)
 			src.append(s)
 			res.append(r)
-
-		print "src"
-		print src
-		print "end"
+			phase.append(p)
+			amp.append(a)
 
 		print this.m.size()
 			
-		return [res, src]
+		return [res, src, amp, phase]
 
 # Random Gaussian with mean = 0, std = 1
 # See Knuth
